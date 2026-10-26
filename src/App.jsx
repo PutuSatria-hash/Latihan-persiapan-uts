@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import confetti from 'canvas-confetti';
-import { questions } from './data/questions';
+import { questions as rawQuestions } from './data/questions';
 import StartMenu from './components/StartMenu';
 import Header from './components/Header';
 import QuestionCard from './components/QuestionCard';
@@ -9,9 +9,30 @@ import QuestionGrid from './components/QuestionGrid';
 import RecapModal from './components/RecapModal';
 import MaterialModal from './components/MaterialModal';
 
+// Algoritma Fisher-Yates untuk pengacakan soal yang adil & merata
+function shuffleQuestions(array) {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 export default function App() {
+  const [activeQuestions, setActiveQuestions] = useState(() => {
+    const saved = localStorage.getItem('bd_active_questions');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        // Fallback jika json rusak
+      }
+    }
+    return shuffleQuestions(rawQuestions);
+  });
+
   const [viewMode, setViewMode] = useState(() => {
-    // Jika ada session kuis yang belum di-submit dan ada jawaban, lanjutkan ke quiz
     const savedSubmitted = localStorage.getItem('bd_submitted');
     const savedAnswers = localStorage.getItem('bd_answers');
     if (savedAnswers && savedSubmitted !== 'true') {
@@ -55,6 +76,10 @@ export default function App() {
 
   // Sinkronisasi state ke LocalStorage
   useEffect(() => {
+    localStorage.setItem('bd_active_questions', JSON.stringify(activeQuestions));
+  }, [activeQuestions]);
+
+  useEffect(() => {
     localStorage.setItem('bd_current_index', currentIndex.toString());
   }, [currentIndex]);
 
@@ -87,8 +112,10 @@ export default function App() {
 
   const handleStartQuiz = (name) => {
     setUserName(name);
-    // Jika belum pernah mulai atau sudah disubmit sebelumnya, reset untuk pengerjaan baru
+    // Jika belum pernah mulai atau sudah disubmit sebelumnya, generate urutan acak baru
     if (isSubmitted || Object.keys(answers).length === 0) {
+      const newShuffled = shuffleQuestions(rawQuestions);
+      setActiveQuestions(newShuffled);
       setAnswers({});
       setIsSubmitted(false);
       setCurrentIndex(0);
@@ -114,16 +141,16 @@ export default function App() {
   };
 
   const handleNext = () => {
-    if (currentIndex < questions.length - 1) {
+    if (currentIndex < activeQuestions.length - 1) {
       setCurrentIndex((prev) => prev + 1);
     }
   };
 
   const handleSubmit = useCallback(() => {
     const totalAnswered = Object.keys(answers).length;
-    if (totalAnswered < questions.length) {
+    if (totalAnswered < activeQuestions.length) {
       const confirmSubmit = window.confirm(
-        `Anda baru menjawab ${totalAnswered} dari ${questions.length} soal. Apakah Anda yakin ingin menyelesaikan kuis sekarang?`
+        `Anda baru menjawab ${totalAnswered} dari ${activeQuestions.length} soal. Apakah Anda yakin ingin menyelesaikan kuis sekarang?`
       );
       if (!confirmSubmit) return;
     }
@@ -133,13 +160,13 @@ export default function App() {
 
     // Hitung skor
     let correct = 0;
-    questions.forEach((q, i) => {
+    activeQuestions.forEach((q, i) => {
       if (answers[i] === q.correctAnswer) {
         correct++;
       }
     });
 
-    const score = Math.round((correct / questions.length) * 100);
+    const score = Math.round((correct / activeQuestions.length) * 100);
 
     // Simpan ke riwayat pengerjaan
     const newEntry = {
@@ -170,11 +197,11 @@ export default function App() {
         // Fallback jika lib canvas bermasalah
       }
     }
-  }, [answers, userName, secondsElapsed]);
+  }, [answers, userName, secondsElapsed, activeQuestions]);
 
   const handleRestart = () => {
     const confirmReset = window.confirm(
-      'Apakah Anda yakin ingin mengulang kuis dari awal? Jawaban dan waktu akan dimulai kembali dari 00:00.'
+      'Apakah Anda yakin ingin mengulang kuis dari awal? Soal akan diacak ulang dan waktu dimulai kembali dari 00:00.'
     );
     if (!confirmReset) return;
 
@@ -183,6 +210,9 @@ export default function App() {
     localStorage.removeItem('bd_current_index');
     localStorage.removeItem('bd_seconds_elapsed');
 
+    // Acak urutan soal baru untuk percobaan baru
+    const newShuffled = shuffleQuestions(rawQuestions);
+    setActiveQuestions(newShuffled);
     setAnswers({});
     setIsSubmitted(false);
     setCurrentIndex(0);
@@ -217,7 +247,7 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentIndex, viewMode, isRecapOpen, isMaterialOpen, answers]);
 
-  const currentQuestion = questions[currentIndex];
+  const currentQuestion = activeQuestions[currentIndex];
   const answeredCount = Object.keys(answers).length;
 
   return (
@@ -226,7 +256,7 @@ export default function App() {
         <StartMenu
           onStartQuiz={handleStartQuiz}
           onOpenMaterial={() => setIsMaterialOpen(true)}
-          totalQuestions={questions.length}
+          totalQuestions={activeQuestions.length}
           quizHistory={quizHistory}
           onClearHistory={handleClearHistory}
         />
@@ -234,7 +264,7 @@ export default function App() {
         <div className="quiz-card">
           <Header
             currentIndex={currentIndex}
-            totalQuestions={questions.length}
+            totalQuestions={activeQuestions.length}
             category={currentQuestion?.category || 'P7-P9'}
             secondsElapsed={secondsElapsed}
             isSubmitted={isSubmitted}
@@ -252,7 +282,7 @@ export default function App() {
 
           <Navigation
             currentIndex={currentIndex}
-            totalQuestions={questions.length}
+            totalQuestions={activeQuestions.length}
             onPrev={handlePrev}
             onNext={handleNext}
             onSubmit={handleSubmit}
@@ -262,10 +292,10 @@ export default function App() {
           />
 
           <QuestionGrid
-            totalQuestions={questions.length}
+            totalQuestions={activeQuestions.length}
             currentIndex={currentIndex}
             answers={answers}
-            questions={questions}
+            questions={activeQuestions}
             onSelectIndex={(idx) => setCurrentIndex(idx)}
           />
         </div>
@@ -274,7 +304,7 @@ export default function App() {
       <RecapModal
         isOpen={isRecapOpen}
         onClose={() => setIsRecapOpen(false)}
-        questions={questions}
+        questions={activeQuestions}
         answers={answers}
         durationSeconds={secondsElapsed}
         userName={userName}

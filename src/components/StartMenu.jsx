@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Play, BookOpen, Clock, CheckCircle2, Award, History, RotateCcw } from 'lucide-react';
+import { Play, BookOpen, Clock, CheckCircle2, Award, History, RotateCcw, Shuffle } from 'lucide-react';
 
 export default function StartMenu({
   onStartQuiz,
@@ -33,6 +33,10 @@ export default function StartMenu({
           <div className="menu-badge-row">
             <span className="category-pill">P7 - P9</span>
             <span className="menu-tag">Big Data UTS Prep</span>
+            <span className="menu-tag" style={{ background: '#f3e8ff', color: '#7e22ce' }}>
+              <Shuffle size={12} style={{ display: 'inline', verticalAlign: '-1px', marginRight: '4px' }} />
+              Soal Diacak
+            </span>
           </div>
           <h1 className="menu-title">Simulasi & Latihan Kuis Big Data</h1>
           <p className="menu-subtitle">
@@ -43,11 +47,11 @@ export default function StartMenu({
         <div className="menu-features-grid">
           <div className="feature-item">
             <div className="feature-icon-wrapper" style={{ background: '#eff6ff', color: '#2563eb' }}>
-              <CheckCircle2 size={20} />
+              <Shuffle size={20} />
             </div>
             <div>
-              <div className="feature-title">50 Soal Lengkap</div>
-              <div className="feature-desc">Mencakup teori & perhitungan alokasi blok fisik HDFS</div>
+              <div className="feature-title">50 Soal Diacak</div>
+              <div className="feature-desc">Urutan soal otomatis diacak setiap sesi baru</div>
             </div>
           </div>
 
