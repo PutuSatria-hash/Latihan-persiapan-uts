@@ -35,7 +35,7 @@ export default function StartMenu({
             <span className="menu-tag">Big Data UTS Prep</span>
             <span className="menu-tag" style={{ background: '#f3e8ff', color: '#7e22ce' }}>
               <Shuffle size={12} style={{ display: 'inline', verticalAlign: '-1px', marginRight: '4px' }} />
-              Soal Diacak
+              Dual Shuffle (Soal & Opsi)
             </span>
           </div>
           <h1 className="menu-title">Simulasi & Latihan Kuis Big Data</h1>
@@ -50,8 +50,8 @@ export default function StartMenu({
               <Shuffle size={20} />
             </div>
             <div>
-              <div className="feature-title">50 Soal Diacak</div>
-              <div className="feature-desc">Urutan soal otomatis diacak setiap sesi baru</div>
+              <div className="feature-title">Dual Shuffle Aktif</div>
+              <div className="feature-desc">Urutan 50 soal dan posisi pilihan A/B/C/D diacak setiap sesi baru</div>
             </div>
           </div>
 

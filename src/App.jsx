@@ -9,14 +9,47 @@ import QuestionGrid from './components/QuestionGrid';
 import RecapModal from './components/RecapModal';
 import MaterialModal from './components/MaterialModal';
 
-// Algoritma Fisher-Yates untuk pengacakan soal yang adil & merata
-function shuffleQuestions(array) {
-  const shuffled = [...array];
-  for (let i = shuffled.length - 1; i > 0; i--) {
+const OPTION_PREFIXES = ['A. ', 'B. ', 'C. ', 'D. '];
+
+// Algoritma Pengacakan Ganda (Dual Shuffle):
+// 1. Mengacak posisi opsi jawaban (A, B, C, D) di dalam setiap soal dan memetakan index kunci jawaban baru
+// 2. Mengacak urutan 50 butir soal secara keseluruhan menggunakan Fisher-Yates
+function shuffleDualQuestions(questionsList) {
+  const processedQuestions = questionsList.map((q) => {
+    // Ekstrak teks opsi tanpa prefix "A. ", "B. ", dst.
+    const rawOptions = q.options.map((opt) => opt.replace(/^[A-D]\.\s*/, '').trim());
+    const correctText = rawOptions[q.correctAnswer];
+
+    // Acak urutan 4 opsi
+    const shuffledRaw = [...rawOptions];
+    for (let i = shuffledRaw.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffledRaw[i], shuffledRaw[j]] = [shuffledRaw[j], shuffledRaw[i]];
+    }
+
+    // Dapatkan index baru untuk jawaban benar
+    const newCorrectAnswer = shuffledRaw.indexOf(correctText);
+
+    // Pasang kembali label A, B, C, D yang rapi
+    const newFormattedOptions = shuffledRaw.map(
+      (text, idx) => `${OPTION_PREFIXES[idx]}${text}`
+    );
+
+    return {
+      ...q,
+      options: newFormattedOptions,
+      correctAnswer: newCorrectAnswer
+    };
+  });
+
+  // Acak urutan 50 soal itu sendiri
+  const finalShuffled = [...processedQuestions];
+  for (let i = finalShuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    [finalShuffled[i], finalShuffled[j]] = [finalShuffled[j], finalShuffled[i]];
   }
-  return shuffled;
+
+  return finalShuffled;
 }
 
 export default function App() {
@@ -29,7 +62,7 @@ export default function App() {
         // Fallback jika json rusak
       }
     }
-    return shuffleQuestions(rawQuestions);
+    return shuffleDualQuestions(rawQuestions);
   });
 
   const [viewMode, setViewMode] = useState(() => {
@@ -114,7 +147,7 @@ export default function App() {
     setUserName(name);
     // Jika belum pernah mulai atau sudah disubmit sebelumnya, generate urutan acak baru
     if (isSubmitted || Object.keys(answers).length === 0) {
-      const newShuffled = shuffleQuestions(rawQuestions);
+      const newShuffled = shuffleDualQuestions(rawQuestions);
       setActiveQuestions(newShuffled);
       setAnswers({});
       setIsSubmitted(false);
@@ -210,8 +243,8 @@ export default function App() {
     localStorage.removeItem('bd_current_index');
     localStorage.removeItem('bd_seconds_elapsed');
 
-    // Acak urutan soal baru untuk percobaan baru
-    const newShuffled = shuffleQuestions(rawQuestions);
+    // Acak ganda (soal dan opsi pilihan) untuk percobaan baru
+    const newShuffled = shuffleDualQuestions(rawQuestions);
     setActiveQuestions(newShuffled);
     setAnswers({});
     setIsSubmitted(false);
