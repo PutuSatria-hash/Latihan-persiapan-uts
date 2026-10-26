@@ -1,0 +1,652 @@
+[
+  {
+    "id": 1,
+    "category": "P7-P9",
+    "question": "Berapa ukuran ruang cakram fisik yang terpakai di HDFS untuk blok terakhir dari berkas berukuran 514 MB dengan ukuran blok 128 MB?",
+    "options": [
+      "A. 0 MB",
+      "B. 128 MB penuh",
+      "C. 64 MB",
+      "D. 2 MB saja"
+    ],
+    "correctAnswer": 3,
+    "explanation": "Ukuran blok 128 MB adalah batas alokasi logis maksimum, bukan alokasi fisik disk di muka. Berkas 514 MB dibagi 128 MB menghasilkan 4 blok penuh (4 x 128 MB = 512 MB) dan blok ke-5 berisi sisa 2 MB (514 - 512 = 2 MB). Di disk fisik, blok ke-5 hanya memakan ruang 2 MB aktual."
+  },
+  {
+    "id": 2,
+    "category": "P7-P9",
+    "question": "Komponen HDFS yang bertugas menyimpan seluruh metadata sistem berkas di memori utama (RAM) adalah...",
+    "options": [
+      "A. DataNode",
+      "B. NameNode",
+      "C. NodeManager",
+      "D. Secondary NameNode"
+    ],
+    "correctAnswer": 1,
+    "explanation": "NameNode adalah master daemon di HDFS yang bertugas mengelola namespace sistem berkas dan memetakan blok ke DataNode. Semua metadata disimpan di RAM untuk memberikan akses pembacaan yang sangat cepat."
+  },
+  {
+    "id": 3,
+    "category": "P7-P9",
+    "question": "Apa fungsi utama dari Secondary NameNode dalam arsitektur Apache Hadoop standar?",
+    "options": [
+      "A. Berfungsi sebagai server cadangan otomatis (hot standby) jika NameNode utama mati",
+      "B. Melakukan checkpointing periodik dengan menggabungkan FsImage dan EditLog agar berkas log tidak membengkak",
+      "C. Menggantikan tugas DataNode yang mengalami kegagalan transmisi",
+      "D. Mengatur alokasi CPU dan memori untuk tugas MapReduce"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Secondary NameNode BUKAN hot backup/failover. Fungsi utamanya adalah Checkpoint Node yang secara berkala mendownload fsimage dan edits dari NameNode, menggabungkannya menjadi fsimage baru, dan mengunggahnya kembali agar EditLog tidak membengkak tak terbatas."
+  },
+  {
+    "id": 4,
+    "category": "P7-P9",
+    "question": "Secara default, berapa nilai faktor replikasi (Replication Factor) blok pada HDFS produksi?",
+    "options": [
+      "A. 1",
+      "B. 2",
+      "C. 3",
+      "D. 5"
+    ],
+    "correctAnswer": 2,
+    "explanation": "Secara default, faktor replikasi di HDFS adalah 3. Artinya, setiap blok data memiliki 3 salinan yang didistribusikan ke seluruh klaster untuk menjamin fault-tolerance."
+  },
+  {
+    "id": 5,
+    "category": "P7-P9",
+    "question": "Bagaimana strategi penempatan replika default (Rack Awareness) pada HDFS jika faktor replikasi bernilai 3?",
+    "options": [
+      "A. Semua replika disimpan pada satu rak yang sama untuk menghemat bandwidth",
+      "B. Replika 1 di node lokal, Replika 2 di rak berbeda, Replika 3 di node berbeda pada rak yang sama dengan replika 2",
+      "C. Setiap replika diletakkan di rak yang berbeda seluruhnya (3 rak berbeda)",
+      "D. Semua 3 replika diletakkan secara acak tanpa memperhatikan topologi rak"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Strategi rack awareness HDFS: Replika 1 ditaruh di node klien (jika di dalam klaster), replika 2 ditaruh di node pada rak yang berbeda (off-rack), dan replika 3 ditaruh di node berbeda tetapi di rak yang sama dengan replika 2. Pola ini menyeimbangkan keandalan saat rak padam dan efisiensi transfer data."
+  },
+  {
+    "id": 6,
+    "category": "P7-P9",
+    "question": "Sinyal berkala yang dikirimkan DataNode ke NameNode setiap 3 detik untuk memberitahukan bahwa DataNode masih hidup disebut...",
+    "options": [
+      "A. Keep-Alive Ping",
+      "B. Block Report",
+      "C. Heartbeat",
+      "D. Handshake ACK"
+    ],
+    "correctAnswer": 2,
+    "explanation": "DataNode mengirimkan 'Heartbeat' ke NameNode setiap 3 detik secara default. Jika NameNode tidak menerima heartbeat selama 10 menit berturut-turut, DataNode dianggap mati."
+  },
+  {
+    "id": 7,
+    "category": "P7-P9",
+    "question": "Laporan yang dikirimkan DataNode ke NameNode setiap beberapa jam (default 6 jam) yang berisi daftar seluruh blok fisik yang disimpannya disebut...",
+    "options": [
+      "A. Status Log",
+      "B. Block Report",
+      "C. Checkpoint Report",
+      "D. Inventory Sync"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Block Report dikirimkan oleh DataNode ke NameNode setiap 6 jam (default). Laporan ini menginformasikan seluruh daftar blok fisik yang tersimpan di disk DataNode tersebut."
+  },
+  {
+    "id": 8,
+    "category": "P7-P9",
+    "question": "Dua berkas persisten pada disk NameNode yang digunakan untuk merekonstruksi metadata saat startup adalah...",
+    "options": [
+      "A. core-site.xml dan hdfs-site.xml",
+      "B. FsImage dan EditLog (edits)",
+      "C. yarn-site.xml dan mapred-site.xml",
+      "D. Part-r-00000 dan _SUCCESS"
+    ],
+    "correctAnswer": 1,
+    "explanation": "FsImage (snapshot namespace dan struktur metadata pada titik waktu tertentu) dan EditLog/edits (catatan transaksi setiap perubahan file sejak FsImage terakhir dibuat) adalah dua komponen persisten NameNode."
+  },
+  {
+    "id": 9,
+    "category": "P7-P9",
+    "question": "Mengapa ukuran blok HDFS (128 MB / 256 MB) dibuat jauh lebih besar dibandingkan ukuran blok pada sistem berkas konvensional (4 KB)?",
+    "options": [
+      "A. Agar disk fisik tidak cepat rusak",
+      "B. Untuk meminimalkan biaya waktu pencarian disk (seek time) dan mengurangi beban memori metadata NameNode",
+      "C. Karena Hadoop tidak mampu membaca data di bawah 64 MB",
+      "D. Untuk mencegah hacker menyusup ke dalam berkas"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Ukuran blok besar bertujuan agar waktu pencarian disk (seek time) jauh lebih kecil dibandingkan waktu transfer data, serta menjaga jumlah entri metadata di RAM NameNode tetap efisien."
+  },
+  {
+    "id": 10,
+    "category": "P7-P9",
+    "question": "Masalah 'Small Files Problem' pada HDFS terjadi ketika banyak berkas berukuran sangat kecil disimpan. Masalah utama yang timbul adalah...",
+    "options": [
+      "A. Kapasitas disk fisik DataNode langsung habis total",
+      "B. Memori RAM NameNode cepat habis karena setiap berkas membutuhkan sekitar 150 byte metadata di memori",
+      "C. Kecepatan kipas server meningkat drastis",
+      "D. CPU DataNode mengalami throttling suhu"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Setiap berkas, direktori, dan blok di HDFS membutuhkan entri metadata di RAM NameNode sekitar 150 byte. Jutaan berkas kecil akan menghabiskan memori NameNode meski kapasitas disk DataNode masih sangat lega."
+  },
+  {
+    "id": 11,
+    "category": "P7-P9",
+    "question": "Jika suatu berkas berukuran 200 MB disimpan di HDFS dengan ukuran blok 64 MB dan faktor replikasi 3, berapa total ruang disk fisik yang dikonsumsi di klaster?",
+    "options": [
+      "A. 200 MB",
+      "B. 600 MB",
+      "C. 768 MB",
+      "D. 192 MB"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Ukuran data aktual berkas adalah 200 MB. Karena faktor replikasi adalah 3, maka total ruang disk fisik yang terpakai di seluruh klaster adalah 200 MB x 3 = 600 MB (blok terakhir yang bersisa hanya memakan ruang fisik aktualnya dikalikan 3)."
+  },
+  {
+    "id": 12,
+    "category": "P7-P9",
+    "question": "Berapa jumlah total blok yang terbentuk untuk berkas berukuran 300 MB jika ukuran blok HDFS disetel ke 128 MB?",
+    "options": [
+      "A. 2 blok",
+      "B. 3 blok",
+      "C. 4 blok",
+      "D. 5 blok"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Perhitungannya: ceil(300 / 128) = ceil(2.34) = 3 blok (Blok 1: 128 MB, Blok 2: 128 MB, Blok 3: 44 MB)."
+  },
+  {
+    "id": 13,
+    "category": "P7-P9",
+    "question": "Pada penulisan berkas ke HDFS, bagaimana data dialirkan dari klien ke DataNode?",
+    "options": [
+      "A. Klien mengirim data ke NameNode, lalu NameNode menyebarkannya ke DataNode",
+      "B. Klien mengirim salinan secara serentak (broadcast) ke seluruh DataNode sekaligus",
+      "C. Melalui pipeline streaming: klien mengirim ke DataNode 1, DataNode 1 meneruskan ke DataNode 2, dan DataNode 2 meneruskan ke DataNode 3",
+      "D. Data ditulis secara bergantian satu per satu menunggu blok sebelumnya selesai diverifikasi di disk"
+    ],
+    "correctAnswer": 2,
+    "explanation": "HDFS menggunakan Write Pipeline: klien melakukan streaming paket-paket kecil ke DataNode pertama dalam pipeline, yang langsung meneruskannya ke DataNode kedua, dan seterusnya hingga ke DataNode ketiga."
+  },
+  {
+    "id": 14,
+    "category": "P7-P9",
+    "question": "Komponen pada arsitektur HDFS High Availability (HA) yang bertugas menjaga konsistensi transaksi edit log antara Active NameNode dan Standby NameNode adalah...",
+    "options": [
+      "A. Resource Manager",
+      "B. Quorum Journal Manager (QJM)",
+      "C. NodeManager",
+      "D. Secondary NameNode"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Quorum Journal Manager (QJM) atau NFS shared storage digunakan pada HDFS HA untuk memastikan Active NameNode mencatat perubahan dan Standby NameNode membacanya secara terus-menerus sehingga selalu tersinkronisasi."
+  },
+  {
+    "id": 15,
+    "category": "P7-P9",
+    "question": "Daemon ZKFC (ZooKeeper Failover Controller) pada HDFS High Availability berfungsi untuk...",
+    "options": [
+      "A. Memantau kesehatan NameNode dan menginisiasi failover otomatis jika Active NameNode crash",
+      "B. Mengenkripsi transmisi data antara klien dan DataNode",
+      "C. Mengompresi berkas log FsImage",
+      "D. Mengatur antrian pekerjaan MapReduce"
+    ],
+    "correctAnswer": 0,
+    "explanation": "ZKFC bertugas memantau status kesehatan NameNode lokal secara berkala. Jika Active NameNode down, ZKFC bekerja sama dengan ZooKeeper untuk secara otomatis menaikkan Standby NameNode menjadi Active."
+  },
+  {
+    "id": 16,
+    "category": "P7-P9",
+    "question": "Manakah komponen YARN yang bertindak sebagai master sentral pengelola seluruh alokasi sumber daya komputasi di klaster?",
+    "options": [
+      "A. NodeManager",
+      "B. ApplicationMaster",
+      "C. ResourceManager",
+      "D. JobTracker"
+    ],
+    "correctAnswer": 2,
+    "explanation": "ResourceManager adalah otoritas tertinggi dalam arsitektur YARN yang mengelola pembagian sumber daya klaster di antara semua aplikasi yang bersaing."
+  },
+  {
+    "id": 17,
+    "category": "P7-P9",
+    "question": "Dua komponen utama di dalam ResourceManager pada YARN adalah...",
+    "options": [
+      "A. TaskScheduler dan TaskTracker",
+      "B. Scheduler dan ApplicationsManager (ASM)",
+      "C. NameNode dan DataNode",
+      "D. RecordReader dan RecordWriter"
+    ],
+    "correctAnswer": 1,
+    "explanation": "ResourceManager terdiri dari Scheduler (yang murni mengalokasikan resource ke aplikasi) dan ApplicationsManager/ASM (yang menerima pengajuan job, memvalidasi, dan meluncurkan ApplicationMaster pertama)."
+  },
+  {
+    "id": 18,
+    "category": "P7-P9",
+    "question": "Pada YARN, daemon yang berjalan pada setiap mesin worker untuk memantau penggunaan resource lokal (CPU, memori) dan mengelola container adalah...",
+    "options": [
+      "A. ResourceManager",
+      "B. NodeManager",
+      "C. ApplicationMaster",
+      "D. TaskTracker"
+    ],
+    "correctAnswer": 1,
+    "explanation": "NodeManager berjalan di setiap worker node, bertugas memonitor sumber daya lokal (memori, CPU, disk) dan mengawasi jalannya Container di node tersebut."
+  },
+  {
+    "id": 19,
+    "category": "P7-P9",
+    "question": "Apa peran dari ApplicationMaster pada arsitektur YARN?",
+    "options": [
+      "A. Mengontrol izin baca dan tulis ke HDFS",
+      "B. Mengatur dan bernegosiasi alokasi resource khusus untuk satu aplikasi tertentu dengan ResourceManager",
+      "C. Menggantikan tugas NameNode saat terjadi gangguan jaringan",
+      "D. Menyimpan semua blok data fisik aplikasi"
+    ],
+    "correctAnswer": 1,
+    "explanation": "ApplicationMaster adalah entitas unik per aplikasi yang menegosiasikan container sumber daya dari ResourceManager dan bekerja sama dengan NodeManager untuk mengeksekusi serta memantau task aplikasi tersebut."
+  },
+  {
+    "id": 20,
+    "category": "P7-P9",
+    "question": "Apa yang dimaksud dengan 'Container' dalam konteks YARN?",
+    "options": [
+      "A. Berkas ZIP yang berisi kode program Java",
+      "B. Abstraksi alokasi sumber daya fisik tertentu (seperti kombinasi jumlah RAM dan CPU vCore)",
+      "C. Mesin virtual lengkap dengan sistem operasi mandiri",
+      "D. Harddisk eksternal yang dihubungkan ke server DataNode"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Container di YARN merepresentasikan alokasi sumber daya komputasi terikat, seperti kombinasi memori RAM (misal 2 GB) dan CPU vCores (misal 1 Core), tempat suatu task dijalankan."
+  },
+  {
+    "id": 21,
+    "category": "P7-P9",
+    "question": "Tipe penjadwal (Scheduler) bawaan standar di Apache Hadoop YARN untuk membagi resource klaster berdasarkan kapasitas queue terjamin adalah...",
+    "options": [
+      "A. FIFO Scheduler",
+      "B. Capacity Scheduler",
+      "C. Fair Scheduler",
+      "D. Priority Preemptive Scheduler"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Capacity Scheduler adalah penjadwal default di Apache Hadoop YARN, dirancang untuk mendukung multi-tenancy di mana setiap organisasi/departemen dialokasikan kapasitas queue tertentu."
+  },
+  {
+    "id": 22,
+    "category": "P7-P9",
+    "question": "Mengapa Hadoop 2.x beralih dari arsitektur MapReduce v1 (JobTracker/TaskTracker) ke arsitektur YARN?",
+    "options": [
+      "A. Karena JobTracker membatasi skalabilitas klaster (~4.000 node) dan hanya mendukung MapReduce",
+      "B. Karena JobTracker menggunakan bahasa pemrograman C++ yang sulit dikembangkan",
+      "C. Karena HDFS tidak lagi kompatibel dengan JobTracker",
+      "D. Karena lisensi JobTracker ditarik oleh Google"
+    ],
+    "correctAnswer": 0,
+    "explanation": "JobTracker di MRv1 memegang peran ganda (manajemen sumber daya dan pemantauan siklus hidup tugas), menjadi bottleneck skalabilitas (~4.000 node) dan SPOF, serta tidak bisa menjalankan framework selain MapReduce (seperti Spark atau Flink)."
+  },
+  {
+    "id": 23,
+    "category": "P7-P9",
+    "question": "Prinsip dasar 'Data Locality' dalam komputasi terdistribusi Big Data berarti...",
+    "options": [
+      "A. Menyalin seluruh data ke server komputasi tercepat",
+      "B. Memindahkan komputasi ke node tempat data disimpan, bukan memindahkan data ke komputasi",
+      "C. Menyimpan data hanya pada satu server lokal tanpa replikasi",
+      "D. Membatasi pengolahan data hanya pada jam operasional kantor lokal"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Filosofi 'Data Locality' menyatakan bahwa 'Moving computation is cheaper than moving data'. Memindahkan potongan kode program yang ringan ke node tempat blok data 128 MB berada jauh lebih cepat daripada memindahkan data ratusan megabyte via jaringan."
+  },
+  {
+    "id": 24,
+    "category": "P7-P9",
+    "question": "Urutan tingkatan Data Locality dari yang paling cepat (paling efisien) hingga paling lambat adalah...",
+    "options": [
+      "A. Off-rack -> Rack-local -> Node-local",
+      "B. Rack-local -> Node-local -> Off-rack",
+      "C. Node-local (Data-local) -> Rack-local -> Off-rack",
+      "D. Off-rack -> Node-local -> Rack-local"
+    ],
+    "correctAnswer": 2,
+    "explanation": "Urutan efisiensi: 1. Node-local (komputasi dan blok data di mesin yang sama), 2. Rack-local (komputasi di mesin berbeda tapi masih dalam 1 rak), 3. Off-rack (komputasi di mesin pada rak yang berbeda, melintasi switch utama jaringan)."
+  },
+  {
+    "id": 25,
+    "category": "P7-P9",
+    "question": "Perbedaan mendasar antara HDFS Block dan InputSplit pada MapReduce adalah...",
+    "options": [
+      "A. HDFS Block adalah pembagian logis, sedangkan InputSplit adalah pembagian fisik",
+      "B. HDFS Block adalah pembagian fisik data di disk, sedangkan InputSplit adalah pembagian logis data untuk satu Mapper",
+      "C. HDFS Block hanya berukuran 4 KB, sedangkan InputSplit berukuran 128 MB",
+      "D. Keduanya adalah objek yang sama persis tanpa perbedaan"
+    ],
+    "correctAnswer": 1,
+    "explanation": "HDFS Block merepresentasikan representasi fisik penyimpanan data di harddisk (misal 128 MB), sedangkan InputSplit adalah potongan logis yang dihitung oleh InputFormat untuk mendefinisikan batas data yang akan diproses oleh tepat satu tugas Mapper."
+  },
+  {
+    "id": 26,
+    "category": "P7-P9",
+    "question": "Komponen yang bertugas membaca data mentah dari InputSplit dan mengubahnya menjadi pasangan Key-Value pertama (<K1, V1>) untuk fungsi map() adalah...",
+    "options": [
+      "A. Partitioner",
+      "B. RecordReader",
+      "C. Combiner",
+      "D. OutputFormat"
+    ],
+    "correctAnswer": 1,
+    "explanation": "RecordReader membaca byte demi byte dari InputSplit dan mengonversinya menjadi pasangan Key-Value <K1, V1> (misal pada TextInputFormat: K1 adalah byte offset baris dan V1 adalah teks isi baris)."
+  },
+  {
+    "id": 27,
+    "category": "P7-P9",
+    "question": "Pada program WordCount MapReduce klasik dengan TextInputFormat, apa tipe data <K1, V1> yang diterima oleh fungsi map()?",
+    "options": [
+      "A. <Kata, Jumlah>",
+      "B. <LongWritable (byte offset), Text (teks baris)>",
+      "C. <Text (kata), IntWritable (angka 1)>",
+      "D. <FileID, BlockID>"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Input awal fungsi map() dari TextInputFormat adalah <LongWritable, Text>, di mana LongWritable adalah offset posisi karakter baris dari awal file, dan Text adalah isi string dari baris tersebut."
+  },
+  {
+    "id": 28,
+    "category": "P7-P9",
+    "question": "Output antara (intermediate key-value) yang dihasilkan oleh fase Map pada program WordCount adalah pasangan...",
+    "options": [
+      "A. <Offset, Kalimat>",
+      "B. <Kata, 1> atau <Text, IntWritable(1)>",
+      "C. <Total_Kata, Dokumen>",
+      "D. <Hash, Partisi>"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Fase Map pada WordCount membaca setiap kata di baris teks dan mengeluarkan pasangan intermediate <K2, V2> berupa <Kata, 1> (misal <Text, IntWritable>)."
+  },
+  {
+    "id": 29,
+    "category": "P7-P9",
+    "question": "Di manakah output antara (intermediate data) dari fase Map disimpan sebelum dikirim ke fase Reduce?",
+    "options": [
+      "A. Di HDFS secara permanen dengan 3 replikasi",
+      "B. Di RAM NameNode",
+      "C. Di disk lokal node tempat Mapper berjalan (bukan di HDFS)",
+      "D. Di database PostgreSQL eksternal"
+    ],
+    "correctAnswer": 2,
+    "explanation": "Output intermediate dari Mapper bersifat sementara, sehingga ditulis langsung ke disk lokal (local disk) node pekerja tempat Mapper berjalan, BUKAN ke HDFS, untuk menghindari overhead replikasi jaringan."
+  },
+  {
+    "id": 30,
+    "category": "P7-P9",
+    "question": "Komponen opsional pada MapReduce yang sering disebut sebagai 'Mini-Reducer' lokal di node Mapper adalah...",
+    "options": [
+      "A. Partitioner",
+      "B. Combiner",
+      "C. RecordWriter",
+      "D. InputSplitter"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Combiner adalah mini-reducer yang dieksekusi secara lokal di node yang sama dengan Mapper untuk melakukan pra-agregasi, sehingga mengurangi volume data yang harus ditransfer melalui jaringan saat fase Shuffle."
+  },
+  {
+    "id": 31,
+    "category": "P7-P9",
+    "question": "Operasi matematis manakah yang AMAN dan valid menggunakan Combiner standar secara langsung?",
+    "options": [
+      "A. Rata-rata (Average / Mean)",
+      "B. Penjumlahan Total (Sum / Count)",
+      "C. Median",
+      "D. Standar Deviasi"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Operasi pada Combiner harus bersifat komutatif dan asosiatif, seperti Sum, Max, Min, dan Count. Operasi seperti Average (Mean) tidak bisa langsung dihitung dengan combiner karena Avg(Avg(A,B), C) != Avg(A,B,C)."
+  },
+  {
+    "id": 32,
+    "category": "P7-P9",
+    "question": "Komponen yang bertugas menentukan ke Reducer mana suatu pasangan intermediate Key-Value akan dikirimkan adalah...",
+    "options": [
+      "A. Partitioner",
+      "B. OutputFormat",
+      "C. InputSplit",
+      "D. ApplicationMaster"
+    ],
+    "correctAnswer": 0,
+    "explanation": "Partitioner bertugas memetakan setiap intermediate key ke Reducer target tertentu. Implementasi default (HashPartitioner) menggunakan rumus: (key.hashCode() & Integer.MAX_VALUE) % numReduceTasks."
+  },
+  {
+    "id": 33,
+    "category": "P7-P9",
+    "question": "Apa jaminan penting yang diberikan oleh mekanisme Partitioner pada Hadoop MapReduce?",
+    "options": [
+      "A. Semua Reducer akan menyelesaikan tugas pada detik yang persis sama",
+      "B. Semua nilai dengan Key yang identik/sama dijamin masuk ke Reducer yang sama",
+      "C. Tidak ada data yang ditulis ke disk lokal",
+      "D. Jumlah partisi selalu berjumlah 10"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Partitioner menjamin bahwa semua data dengan key yang sama akan selalu diarahkan ke satu Reducer yang sama, sehingga Reducer dapat mengagregasi semua value untuk key tersebut secara komprehensif."
+  },
+  {
+    "id": 34,
+    "category": "P7-P9",
+    "question": "Fase dalam MapReduce di mana output dari berbagai Mapper dipindahkan melalui jaringan ke node Reducer disebut...",
+    "options": [
+      "A. Partitioning",
+      "B. Shuffling",
+      "C. Checkpointing",
+      "D. Mapping"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Shuffle adalah fase transfer data intermediate dari disk lokal semua Mapper ke memori/disk mesin Reducer melalui protokol HTTP."
+  },
+  {
+    "id": 35,
+    "category": "P7-P9",
+    "question": "Kapan proses pengurutan (Sort) pada MapReduce dilakukan secara otomatis oleh framework?",
+    "options": [
+      "A. Sebelum data dimasukkan ke fungsi map()",
+      "B. Bersamaan dengan fase Shuffle sebelum data diproses oleh fungsi reduce()",
+      "C. Setelah data selesai ditulis ke berkas HDFS oleh Reducer",
+      "D. Tidak pernah ada proses pengurutan di Hadoop"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Hadoop secara otomatis melakukan pengurutan (Sort/Merge) pada fase Shuffle and Sort, sebelum data diserahkan ke method reduce(). Oleh karena itu, key yang masuk ke Reducer selalu dalam keadaan terurut."
+  },
+  {
+    "id": 36,
+    "category": "P7-P9",
+    "question": "Jika sebuah pekerjaan MapReduce disetel dengan jumlah Reducer = 0 (job.setNumReduceTasks(0)), apa yang terjadi?",
+    "options": [
+      "A. Program akan crash dan melemparkan exception",
+      "B. Pekerjaan menjadi 'Map-Only Job', output langsung ditulis ke HDFS tanpa fase Shuffle dan Sort",
+      "C. Hadoop otomatis memilih 1 Reducer secara paksa",
+      "D. Data intermediate dihapus dan tidak ada output"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Jika Reducer di-set 0, maka pekerjaan disebut 'Map-Only Job'. Output dari Mapper langsung ditulis ke HDFS tanpa melalui fase Shuffle, Sort, maupun Reduce, yang sangat menghemat waktu untuk transformasi format atau pemfilteran data."
+  },
+  {
+    "id": 37,
+    "category": "P7-P9",
+    "question": "Format penamaan berkas output standar yang dihasilkan oleh Reducer pada direktori output HDFS adalah...",
+    "options": [
+      "A. output.csv",
+      "B. result.json",
+      "C. part-r-00000",
+      "D. data-final.txt"
+    ],
+    "correctAnswer": 2,
+    "explanation": "Output Reducer di HDFS secara default diberi nama `part-r-XXXXX` (di mana XXXXX adalah ID Reducer, misal 00000, 00001). Untuk Map-only job, namanya adalah `part-m-XXXXX`."
+  },
+  {
+    "id": 38,
+    "category": "P7-P9",
+    "question": "Sebuah berkas berukuran 1024 MB disimpan di HDFS dengan ukuran blok 128 MB. Secara default, berapa jumlah tugas Mapper yang akan diluncurkan untuk memproses berkas tersebut?",
+    "options": [
+      "A. 1 Mapper",
+      "B. 4 Mapper",
+      "C. 8 Mapper",
+      "D. 16 Mapper"
+    ],
+    "correctAnswer": 2,
+    "explanation": "Jumlah tugas Mapper default sama dengan jumlah InputSplit (yang secara default berukuran 1 HDFS Block). Maka: 1024 MB / 128 MB = 8 blok = 8 Mapper."
+  },
+  {
+    "id": 39,
+    "category": "P7-P9",
+    "question": "Perintah CLI Hadoop untuk menampilkan daftar berkas dan folder pada root HDFS adalah...",
+    "options": [
+      "A. hdfs dfs -ls /",
+      "B. hdfs dfs -dir /",
+      "C. hadoop fs -show /",
+      "D. hdfs storage -list /"
+    ],
+    "correctAnswer": 0,
+    "explanation": "Perintah standar CLI untuk melihat daftar direktori di HDFS adalah `hdfs dfs -ls /` atau `hadoop fs -ls /`."
+  },
+  {
+    "id": 40,
+    "category": "P7-P9",
+    "question": "Perintah CLI untuk menyalin berkas dari sistem berkas lokal ke HDFS adalah...",
+    "options": [
+      "A. hdfs dfs -get <local> <hdfs>",
+      "B. hdfs dfs -put <local> <hdfs>",
+      "C. hdfs dfs -export <local> <hdfs>",
+      "D. hdfs dfs -pull <local> <hdfs>"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Perintah `hdfs dfs -put <local> <hdfs>` (atau `-copyFromLocal`) digunakan untuk mengunggah berkas dari filesystem lokal ke HDFS. Sebaliknya, `-get` digunakan untuk mengunduh dari HDFS ke lokal."
+  },
+  {
+    "id": 41,
+    "category": "P7-P9",
+    "question": "Mode operasi Hadoop di mana semua daemon (NameNode, DataNode, RM, NM) berjalan pada satu mesin tunggal dalam JVM yang sama untuk keperluan debugging disebut...",
+    "options": [
+      "A. Fully Distributed Mode",
+      "B. Pseudo-Distributed Mode",
+      "C. Local (Standalone) Mode",
+      "D. High Availability Mode"
+    ],
+    "correctAnswer": 2,
+    "explanation": "Local (Standalone) Mode menjalankan Hadoop sebagai proses Java tunggal tanpa daemon HDFS/YARN untuk kemudahan pengujian dan debugging kode."
+  },
+  {
+    "id": 42,
+    "category": "P7-P9",
+    "question": "Mode operasi di mana semua daemon Hadoop berjalan di satu mesin tunggal tetapi masing-masing daemon berjalan dalam proses JVM terpisah adalah...",
+    "options": [
+      "A. Local Standalone Mode",
+      "B. Pseudo-Distributed Mode",
+      "C. Fully Distributed Mode",
+      "D. Hybrid Cloud Mode"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Pseudo-Distributed Mode mensimulasikan klaster terdistribusi pada satu server tunggal, di mana setiap daemon (NameNode, DataNode, dll.) berjalan di proses Java (JVM) terpisah."
+  },
+  {
+    "id": 43,
+    "category": "P7-P9",
+    "question": "Di HDFS, jika klien sedang membaca sebuah blok data dan mendeteksi adanya data rusak (checksum error), apa yang dilakukan oleh klien?",
+    "options": [
+      "A. Membatalkan seluruh proses pembacaan dan menampilkan fatal error",
+      "B. Melaporkan blok rusak ke NameNode dan otomatis membaca salinan blok tersebut dari DataNode lain",
+      "C. Menghapus DataNode yang bersangkutan dari klaster",
+      "D. Mencoba memperbaiki data secara otomatis menggunakan algoritma parity"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Klien memverifikasi checksum saat membaca blok. Jika terjadi ketidakcocokan (corrupt), klien melaporkannya ke NameNode dan beralih ke DataNode lain yang menyimpan replika blok yang valid."
+  },
+  {
+    "id": 44,
+    "category": "P7-P9",
+    "question": "Fitur baru pada Apache Hadoop 3.x yang memungkinkan penghematan ruang penyimpanan hingga 50% dibandingkan replikasi konvensional 3x adalah...",
+    "options": [
+      "A. Gzip Compression",
+      "B. Erasure Coding (EC)",
+      "C. Snappy Codec",
+      "D. Block De-duplication"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Erasure Coding (EC) pada Hadoop 3.x menggunakan skema parity (seperti Reed-Solomon) yang memangkas overhead penyimpanan dari 200% (pada replikasi 3x) menjadi hanya sekitar 50%, dengan toleransi kegagalan yang setara atau lebih baik."
+  },
+  {
+    "id": 45,
+    "category": "P7-P9",
+    "question": "Kondisi Safe Mode pada NameNode HDFS terjadi saat...",
+    "options": [
+      "A. Klaster sedang diserang malware dan seluruh port ditutup",
+      "B. Startup awal NameNode di mana sistem berkas hanya dapat dibaca (read-only) sambil mengumpulkan Block Report dari DataNode",
+      "C. Suhu ruang server melebihi batas toleransi",
+      "D. Seluruh ruang harddisk di DataNode telah terisi 100%"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Safe Mode adalah status read-only saat NameNode baru menyala. Pada fase ini, NameNode memuat FsImage, menerapkan EditLog, dan menunggu DataNode mengirimkan Block Report hingga ambang batas minimal terpenuhi sebelum membuka akses tulis."
+  },
+  {
+    "id": 46,
+    "category": "P7-P9",
+    "question": "Bagaimana HDFS menangani penulisan data oleh beberapa klien secara bersamaan pada berkas yang sama?",
+    "options": [
+      "A. Mengizinkan multiple writers secara paralel pada offset yang berbeda",
+      "B. Hanya mengizinkan satu penulis aktif pada satu waktu (Single-Writer Model), tidak mendukung modifikasi acak (random write)",
+      "C. Menggabungkan kedua input klien secara otomatis dengan algoritma git merge",
+      "D. Menolak seluruh permintaan tulis sampai klien me-restart komputer"
+    ],
+    "correctAnswer": 1,
+    "explanation": "HDFS mengadopsi model akses Write-Once-Read-Many (WORM) dengan Single-Writer model. Hanya satu klien yang dapat menulis/menambahkan data pada satu waktu, dan HDFS tidak mendukung penulisan acak (random write) di tengah berkas."
+  },
+  {
+    "id": 47,
+    "category": "P7-P9",
+    "question": "Dalam konteks MapReduce, apa yang dimaksud dengan istilah 'Straggler Task'?",
+    "options": [
+      "A. Task yang gagal dieksekusi karena sintaks error pada kode program",
+      "B. Task yang berjalan jauh lebih lambat dari task lainnya dalam satu job karena masalah hardware atau beban node",
+      "C. Task yang pertama kali selesai di klaster",
+      "D. Task yang bertugas menghapus berkas sementara"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Straggler Task adalah tugas yang berjalan lambat dan memperpanjang total waktu penyelesaian job. Hadoop mengatasi ini dengan mekanisme 'Speculative Execution' (menjalankan tugas duplikat spekulatif pada node lain)."
+  },
+  {
+    "id": 48,
+    "category": "P7-P9",
+    "question": "Mekanisme apa yang digunakan oleh Hadoop untuk mengatasi Straggler Task dengan menjalankan salinan tugas secara paralel di node lain?",
+    "options": [
+      "A. Parallel Garbage Collection",
+      "B. Speculative Execution",
+      "C. Fault Preemption",
+      "D. Dynamic Resizing"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Speculative Execution mendeteksi task yang berjalan abnormal lambat dan meluncurkan task cadangan (backup instance) secara spekulatif di node lain. Task mana pun yang selesai lebih dulu akan diambil hasilnya dan yang lain dibatalkan."
+  },
+  {
+    "id": 49,
+    "category": "P7-P9",
+    "question": "Di mana letak perbedaan utama antara Apache Spark dan Hadoop MapReduce dalam hal pemrosesan data?",
+    "options": [
+      "A. Spark tidak dapat membaca data dari HDFS",
+      "B. Spark memproses data secara in-memory (RAM) dengan DAG, sedangkan MapReduce menulis state intermediate ke disk di setiap siklus",
+      "C. MapReduce jauh lebih cepat daripada Spark untuk algoritma machine learning iteratif",
+      "D. Spark hanya bisa dijalankan di satu laptop tunggal"
+    ],
+    "correctAnswer": 1,
+    "explanation": "MapReduce menulis hasil antara ke disk lokal di setiap tahapan, sedangkan Apache Spark memproses data langsung di dalam memori (RAM) menggunakan Resilient Distributed Datasets (RDD) dan DAG execution, menjadikannya hingga 100x lebih cepat untuk komputasi iteratif."
+  },
+  {
+    "id": 50,
+    "category": "P7-P9",
+    "question": "Jika suatu klaster HDFS memiliki 10 DataNode dan sebuah berkas 100 GB disimpan dengan faktor replikasi 3, berapa kapasitas total yang digunakan oleh berkas tersebut di klaster?",
+    "options": [
+      "A. 100 GB",
+      "B. 300 GB",
+      "C. 1000 GB",
+      "D. 30 GB"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Kapasitas total yang dikonsumsi adalah: Ukuran Berkas x Faktor Replikasi = 100 GB x 3 = 300 GB. Jumlah DataNode (10) menentukan kapasitas total klaster, tetapi ruang yang dipakai berkas tetap 300 GB."
+  }
+]
