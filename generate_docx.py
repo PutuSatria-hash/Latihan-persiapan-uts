@@ -331,8 +331,13 @@ def create_document():
     f_r.font.color.rgb = RGBColor(148, 163, 184)
 
     output_path = "c:/Users/Satria Prana/Documents/Programing/Big Data/belajar big data/DOKUMEN_MATERI_LENGKAP_BIG_DATA_P7_P9.docx"
-    doc.save(output_path)
-    print("Document successfully created at:", output_path)
+    try:
+        doc.save(output_path)
+        print("Document successfully created at:", output_path)
+    except PermissionError:
+        fallback_path = "c:/Users/Satria Prana/Documents/Programing/Big Data/belajar big data/DOKUMEN_MATERI_LENGKAP_BIG_DATA_P7_P9_BANK250.docx"
+        doc.save(fallback_path)
+        print("Original docx is currently open in Word. Saved to:", fallback_path)
 
 if __name__ == "__main__":
     create_document()

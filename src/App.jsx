@@ -9,28 +9,64 @@ import QuestionGrid from './components/QuestionGrid';
 import RecapModal from './components/RecapModal';
 import MaterialModal from './components/MaterialModal';
 
+const MODULE_QUOTAS = {
+  HDFS_STORAGE: 15,
+  CALCULATIONS: 10,
+  YARN_ARCHITECTURE: 10,
+  MAPREDUCE_COMPUTING: 15
+};
+
 const OPTION_PREFIXES = ['A. ', 'B. ', 'C. ', 'D. '];
 
-// Algoritma Pengacakan Ganda (Dual Shuffle):
-// 1. Mengacak posisi opsi jawaban (A, B, C, D) di dalam setiap soal dan memetakan index kunci jawaban baru
-// 2. Mengacak urutan 50 butir soal secara keseluruhan menggunakan Fisher-Yates
-function shuffleDualQuestions(questionsList) {
-  const processedQuestions = questionsList.map((q) => {
-    // Ekstrak teks opsi tanpa prefix "A. ", "B. ", dst.
+function shuffleArray(array) {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+// Opsi B: Proportional Stratified Sampling
+// Mengambil tepat 50 soal berimbang dari 250 bank soal (15 HDFS, 10 Kalkulasi, 10 YARN, 15 MapReduce)
+// + Mengacak posisi 4 pilihan jawaban A/B/C/D di setiap soal (Dual Shuffle)
+function sampleAndShuffleStratified(allQuestions) {
+  const byModule = {
+    HDFS_STORAGE: [],
+    CALCULATIONS: [],
+    YARN_ARCHITECTURE: [],
+    MAPREDUCE_COMPUTING: []
+  };
+
+  allQuestions.forEach((q) => {
+    const mod = q.module || 'HDFS_STORAGE';
+    if (byModule[mod]) {
+      byModule[mod].push(q);
+    } else {
+      byModule.HDFS_STORAGE.push(q);
+    }
+  });
+
+  let selected50 = [];
+  Object.keys(MODULE_QUOTAS).forEach((mod) => {
+    const quota = MODULE_QUOTAS[mod];
+    const available = shuffleArray(byModule[mod] || []);
+    selected50 = selected50.concat(available.slice(0, quota));
+  });
+
+  if (selected50.length < 50) {
+    const remainingNeeded = 50 - selected50.length;
+    const remainingPool = allQuestions.filter((q) => !selected50.some((s) => s.id === q.id));
+    selected50 = selected50.concat(shuffleArray(remainingPool).slice(0, remainingNeeded));
+  }
+
+  const processedQuestions = selected50.map((q) => {
     const rawOptions = q.options.map((opt) => opt.replace(/^[A-D]\.\s*/, '').trim());
     const correctText = rawOptions[q.correctAnswer];
 
-    // Acak urutan 4 opsi
-    const shuffledRaw = [...rawOptions];
-    for (let i = shuffledRaw.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffledRaw[i], shuffledRaw[j]] = [shuffledRaw[j], shuffledRaw[i]];
-    }
-
-    // Dapatkan index baru untuk jawaban benar
+    const shuffledRaw = shuffleArray(rawOptions);
     const newCorrectAnswer = shuffledRaw.indexOf(correctText);
 
-    // Pasang kembali label A, B, C, D yang rapi
     const newFormattedOptions = shuffledRaw.map(
       (text, idx) => `${OPTION_PREFIXES[idx]}${text}`
     );
@@ -42,14 +78,7 @@ function shuffleDualQuestions(questionsList) {
     };
   });
 
-  // Acak urutan 50 soal itu sendiri
-  const finalShuffled = [...processedQuestions];
-  for (let i = finalShuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [finalShuffled[i], finalShuffled[j]] = [finalShuffled[j], finalShuffled[i]];
-  }
-
-  return finalShuffled;
+  return shuffleArray(processedQuestions);
 }
 
 export default function App() {
@@ -62,7 +91,7 @@ export default function App() {
         // Fallback jika json rusak
       }
     }
-    return shuffleDualQuestions(rawQuestions);
+    return sampleAndShuffleStratified(rawQuestions);
   });
 
   const [viewMode, setViewMode] = useState(() => {
@@ -147,7 +176,7 @@ export default function App() {
     setUserName(name);
     // Jika belum pernah mulai atau sudah disubmit sebelumnya, generate urutan acak baru
     if (isSubmitted || Object.keys(answers).length === 0) {
-      const newShuffled = shuffleDualQuestions(rawQuestions);
+      const newShuffled = sampleAndShuffleStratified(rawQuestions);
       setActiveQuestions(newShuffled);
       setAnswers({});
       setIsSubmitted(false);
@@ -243,8 +272,8 @@ export default function App() {
     localStorage.removeItem('bd_current_index');
     localStorage.removeItem('bd_seconds_elapsed');
 
-    // Acak ganda (soal dan opsi pilihan) untuk percobaan baru
-    const newShuffled = shuffleDualQuestions(rawQuestions);
+    // Ambil 50 soal berimbang dari 250 bank soal & acak ganda
+    const newShuffled = sampleAndShuffleStratified(rawQuestions);
     setActiveQuestions(newShuffled);
     setAnswers({});
     setIsSubmitted(false);

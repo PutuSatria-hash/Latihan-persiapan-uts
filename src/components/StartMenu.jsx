@@ -32,15 +32,15 @@ export default function StartMenu({
         <div className="menu-header">
           <div className="menu-badge-row">
             <span className="category-pill">P7 - P9</span>
-            <span className="menu-tag">Big Data UTS Prep</span>
+            <span className="menu-tag">250 Soal Bank</span>
             <span className="menu-tag" style={{ background: '#f3e8ff', color: '#7e22ce' }}>
               <Shuffle size={12} style={{ display: 'inline', verticalAlign: '-1px', marginRight: '4px' }} />
-              Dual Shuffle (Soal & Opsi)
+              50 Soal Acak Berimbang
             </span>
           </div>
           <h1 className="menu-title">Simulasi & Latihan Kuis Big Data</h1>
           <p className="menu-subtitle">
-            Hadoop Architecture, HDFS Storage, YARN Resource Management, & MapReduce Processing Model.
+            Bank 250 soal komprehensif HDFS, Kalkulasi Fisik Disk, YARN, & MapReduce. Diambil 50 soal berimbang secara acak tiap sesi pengerjaan.
           </p>
         </div>
 
@@ -50,8 +50,8 @@ export default function StartMenu({
               <Shuffle size={20} />
             </div>
             <div>
-              <div className="feature-title">Dual Shuffle Aktif</div>
-              <div className="feature-desc">Urutan 50 soal dan posisi pilihan A/B/C/D diacak setiap sesi baru</div>
+              <div className="feature-title">50 Soal Berimbang</div>
+              <div className="feature-desc">Diambil acak dari 250 bank soal (HDFS, Hitungan, YARN, MapReduce)</div>
             </div>
           </div>
 
