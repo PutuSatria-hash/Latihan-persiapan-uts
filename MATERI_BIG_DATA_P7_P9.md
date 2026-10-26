@@ -40,6 +40,34 @@ Apache Hadoop dikembangkan oleh Doug Cutting dan Mike Cafarella terinspirasi ole
   * Klaster dapat menjalankan berbagai mesin komputasi secara bersamaan: MapReduce, Apache Spark, Apache Flink, Apache Tez, Apache Storm, dll.
   * Hadoop 3.x memperkenalkan *Erasure Coding* (menghemat penyimpanan hingga 50%), dukungan GPU, dan multiple NameNodes standby.
 
+### 1.5 Arsitektur Big Data: Big Data Stack 7 Lapis
+Arsitektur tumpukan Big Data (Big Data Architecture Stack) umumnya dipetakan menjadi 7 lapisan hierarkis dari sumber data mentah hingga konsumsi nilai bisnis:
+
+1. **Lapis 1 - Data Source Layer (Lapisan Sumber Data):**
+   * Asal mula data mentah dihasilkan dalam format terstruktur, semi-terstruktur, maupun tidak terstruktur.
+   * *Komponen/Contoh:* IoT sensor, database transaksional (MySQL, PostgreSQL), server application logs, media sosial, file telemetry.
+2. **Lapis 2 - Data Ingestion Layer (Lapisan Ingesti & Pengumpulan Data):**
+   * Bertanggung jawab menarik, memindahkan, dan mengumpulkan data dari berbagai sumber data ke klaster Big Data secara batch maupun real-time streaming.
+   * *Komponen/Contoh:* **Apache Kafka** (message streaming broker), **Apache Flume** (log ingestion), **Apache Sqoop** (transfer batch RDBMS ke Hadoop), Apache NiFi.
+3. **Lapis 3 - Data Storage Layer (Lapisan Penyimpanan Terdistribusi) [CRITICAL EXAM POINT]:**
+   * Menyediakan fondasi penyimpanan data berkapasitas sangat masif, terdistribusi, hemat biaya, dan tahan terhadap kegagalan hardware (*fault-tolerant*).
+   * **Posisi Komponen Utama:**
+     * **HDFS (Hadoop Distributed File System):** File system terdistribusi untuk berkas skala petabyte dengan akses throughput tinggi berbasis pola *Write-Once-Read-Many (WORM)*.
+     * **Apache HBase:** Basis data NoSQL berorientasi kolom (*column-family store*) yang berjalan langsung di atas HDFS untuk melayani kebutuhan baca/tulis acak berkecepatan tinggi secara *real-time* (*low-latency random read/write*).
+     * *Teknologi lain:* Apache Cassandra, MongoDB, Amazon S3, Google Cloud Storage.
+4. **Lapis 4 - Data Processing & Resource Management Layer (Lapisan Pemrosesan & Komputasi):**
+   * Mesin komputasi dan pengatur sumber daya klaster untuk memproses data mentah menjadi data bernilai.
+   * *Komponen/Contoh:* **YARN** (cluster resource negotiator), **Hadoop MapReduce** (batch computing), **Apache Spark** (in-memory computing), Apache Flink (event-driven streaming).
+5. **Lapis 5 - Data Querying & Analysis Layer (Lapisan Kueri & Analisis):**
+   * Abstraksi tingkat tinggi di atas lapisan pemrosesan untuk memudahkan analis melakukan kueri deklaratif (SQL-like) dan machine learning.
+   * *Komponen/Contoh:* **Apache Hive** (data warehouse SQL di atas Hadoop), **Apache Impala / Presto / Trino** (interactive SQL query engine), Apache Spark SQL, Apache Pig.
+6. **Lapis 6 - Data Governance, Security & Cluster Management Layer (Lapisan Tata Kelola & Keamanan):**
+   * Mengatur kebijakan keamanan, otentikasi, otorisasi akses data, audit, katalog metadata, dan koordinasi sinkronisasi node klaster.
+   * *Komponen/Contoh:* **Apache Ranger** (kebijakan keamanan & audit), **Apache Atlas** (data governance & data lineage), **Kerberos** (otentikasi terpusat), **Apache ZooKeeper** (koordinasi terdistribusi & failover).
+7. **Lapis 7 - Data Visualization & Consumption Layer (Lapisan Konsumsi & Visualisasi):**
+   * Lapisan teratas tempat hasil olahan data disajikan kepada end-user bisnis, eksekutif, dan sistem hilir.
+   * *Komponen/Contoh:* Tableau, Power BI, Apache Superset, Metabase, dasbor analitik web, dan REST API aplikasi bisnis.
+
 ---
 
 ## MODUL 2: HDFS (HADOOP DISTRIBUTED FILE SYSTEM) DEEP-DIVE

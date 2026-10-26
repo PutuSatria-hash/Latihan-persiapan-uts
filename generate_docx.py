@@ -171,6 +171,18 @@ def create_document():
     add_bullet("Hadoop 2.x memisahkan komputasi dari resource management dengan memperkenalkan YARN. Klaster dapat menjalankan Spark, Flink, Tez, dan HBase secara berdampingan.", bold_prefix="Hadoop 2.x: ")
     add_bullet("Hadoop 3.x menambahkan Erasure Coding (menghemat storage hingga 50%), multi-standby NameNodes, dan dukungan GPU Container.", bold_prefix="Hadoop 3.x: ")
 
+    add_heading_2("1.5 Arsitektur Big Data: Big Data Stack 7 Lapis")
+    add_body(
+        "Arsitektur tumpukan Big Data standar universitas dan industri dipetakan menjadi 7 lapisan hierarkis dari hulu ke hilir:"
+    )
+    add_bullet("Sumber data asli (IoT sensor, database transaksional MySQL/PostgreSQL, log aplikasi, media sosial).", bold_prefix="Lapis 1 - Data Source Layer: ")
+    add_bullet("Penarikan dan penyaluran data (Apache Kafka, Apache Flume, Apache Sqoop, Apache NiFi).", bold_prefix="Lapis 2 - Data Ingestion Layer: ")
+    add_bullet("Penyimpanan terdistribusi skala petabyte (HDFS untuk file sekuensial WORM, Apache HBase untuk NoSQL columnar real-time random access, Cassandra). [POSISI HDFS & HBASE]", bold_prefix="Lapis 3 - Data Storage Layer: ")
+    add_bullet("Mesin pemrosesan dan manajemen sumber daya komputasi (YARN, Hadoop MapReduce, Apache Spark, Apache Flink).", bold_prefix="Lapis 4 - Data Processing Layer: ")
+    add_bullet("Antarmuka kueri analitik deklaratif berbasis SQL (Apache Hive, Apache Impala, Presto/Trino, Spark SQL).", bold_prefix="Lapis 5 - Data Query & Analysis Layer: ")
+    add_bullet("Tata kelola, keamanan, audit, dan koordinasi klaster (Apache Ranger, Apache Atlas, Apache ZooKeeper, Kerberos).", bold_prefix="Lapis 6 - Data Governance & Security: ")
+    add_bullet("Konsumsi nilai bisnis dan pelaporan eksekutif (Tableau, Power BI, Apache Superset, Web Dashboard).", bold_prefix="Lapis 7 - Data Visualization Layer: ")
+
     # --- MODUL 2 ---
     add_heading_1("MODUL 2: HDFS (HADOOP DISTRIBUTED FILE SYSTEM) DEEP-DIVE")
     add_body(

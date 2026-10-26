@@ -51,6 +51,33 @@ export default function MaterialModal({ isOpen, onClose }) {
             Hadoop 1.x memiliki bottleneck pada JobTracker (Single Point of Failure, skalabilitas terbatas ~4.000 node, hanya bisa MapReduce). Hadoop 2.x/3.x memisahkan komputasi dan resource management dengan memperkenalkan <strong>YARN</strong>, sehingga dapat menjalankan Spark, Flink, Storm, dan Tez di atas klaster yang sama.
           </p>
 
+          <div
+            style={{
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderRadius: '8px',
+              padding: '14px 16px',
+              margin: '16px 0'
+            }}
+          >
+            <h4 style={{ margin: '0 0 10px 0', color: '#0f172a', fontSize: '15px' }}>
+              Arsitektur Big Data: Big Data Stack 7 Lapis
+            </h4>
+            <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '13px', lineHeight: '1.6' }}>
+              <li><strong>Lapis 1 - Data Source Layer:</strong> IoT, RDBMS, Web Logs, Media Sosial.</li>
+              <li><strong>Lapis 2 - Data Ingestion Layer:</strong> Apache Kafka, Apache Flume, Apache Sqoop, NiFi.</li>
+              <li>
+                <strong style={{ color: '#059669' }}>Lapis 3 - Data Storage Layer (CRITICAL EXAM):</strong>{' '}
+                Tempat penyimpanan terdistribusi <strong>HDFS (Distributed File System)</strong> dan{' '}
+                <strong>Apache HBase (NoSQL Columnar Database)</strong>.
+              </li>
+              <li><strong>Lapis 4 - Data Processing Layer:</strong> Hadoop MapReduce, Apache Spark, Apache Flink, YARN.</li>
+              <li><strong>Lapis 5 - Data Query & Analysis Layer:</strong> Apache Hive, Apache Impala, Presto, Spark SQL.</li>
+              <li><strong>Lapis 6 - Data Governance & Security:</strong> Apache Ranger, Apache Atlas, Apache ZooKeeper, Kerberos.</li>
+              <li><strong>Lapis 7 - Data Visualization & Consumption:</strong> Tableau, Power BI, Apache Superset, Web Dashboard.</li>
+            </ul>
+          </div>
+
           <h2>MODUL 2: HDFS (HADOOP DISTRIBUTED FILE SYSTEM) DEEP-DIVE</h2>
           <p>
             <strong>Konsep Block Storage:</strong> Ukuran default blok HDFS adalah <strong>128 MB</strong> (atau 64 MB di versi lama). Blok berukuran besar ditujukan untuk meminimalkan <em>seek time</em> harddisk dan mengurangi beban memori RAM pada NameNode.
