@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import confetti from 'canvas-confetti';
 import { questions } from './data/questions';
+import StartMenu from './components/StartMenu';
 import Header from './components/Header';
 import QuestionCard from './components/QuestionCard';
 import Navigation from './components/Navigation';
@@ -8,9 +9,21 @@ import QuestionGrid from './components/QuestionGrid';
 import RecapModal from './components/RecapModal';
 import MaterialModal from './components/MaterialModal';
 
-const DEFAULT_TIME = 3600; // 60 menit
-
 export default function App() {
+  const [viewMode, setViewMode] = useState(() => {
+    // Jika ada session kuis yang belum di-submit dan ada jawaban, lanjutkan ke quiz
+    const savedSubmitted = localStorage.getItem('bd_submitted');
+    const savedAnswers = localStorage.getItem('bd_answers');
+    if (savedAnswers && savedSubmitted !== 'true') {
+      return 'quiz';
+    }
+    return 'menu';
+  });
+
+  const [userName, setUserName] = useState(() => {
+    return localStorage.getItem('bd_user_name') || 'Peserta';
+  });
+
   const [currentIndex, setCurrentIndex] = useState(() => {
     const saved = localStorage.getItem('bd_current_index');
     return saved ? parseInt(saved, 10) : 0;
@@ -25,15 +38,22 @@ export default function App() {
     return localStorage.getItem('bd_submitted') === 'true';
   });
 
-  const [timeLeft, setTimeLeft] = useState(() => {
-    const saved = localStorage.getItem('bd_time_left');
-    return saved ? parseInt(saved, 10) : DEFAULT_TIME;
+  // Stopwatch waktu pengerjaan: mulai dari 00:00 dan bertambah terus
+  const [secondsElapsed, setSecondsElapsed] = useState(() => {
+    const saved = localStorage.getItem('bd_seconds_elapsed');
+    return saved ? parseInt(saved, 10) : 0;
   });
 
   const [isRecapOpen, setIsRecapOpen] = useState(false);
   const [isMaterialOpen, setIsMaterialOpen] = useState(false);
 
-  // Sync state ke localStorage
+  // Riwayat pengerjaan lokal
+  const [quizHistory, setQuizHistory] = useState(() => {
+    const saved = localStorage.getItem('bd_history');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  // Sinkronisasi state ke LocalStorage
   useEffect(() => {
     localStorage.setItem('bd_current_index', currentIndex.toString());
   }, [currentIndex]);
@@ -47,29 +67,40 @@ export default function App() {
   }, [isSubmitted]);
 
   useEffect(() => {
-    localStorage.setItem('bd_time_left', timeLeft.toString());
-  }, [timeLeft]);
+    localStorage.setItem('bd_seconds_elapsed', secondsElapsed.toString());
+  }, [secondsElapsed]);
 
-  // Countdown Timer
   useEffect(() => {
-    if (isSubmitted || timeLeft <= 0) return;
+    localStorage.setItem('bd_history', JSON.stringify(quizHistory));
+  }, [quizHistory]);
+
+  // Stopwatch Timer: berjalan terus setiap detik selama dalam mode quiz dan belum disubmit
+  useEffect(() => {
+    if (viewMode !== 'quiz' || isSubmitted) return;
 
     const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          handleSubmit();
-          return 0;
-        }
-        return prev - 1;
-      });
+      setSecondsElapsed((prev) => prev + 1);
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [isSubmitted, timeLeft]);
+  }, [viewMode, isSubmitted]);
+
+  const handleStartQuiz = (name) => {
+    setUserName(name);
+    // Jika belum pernah mulai atau sudah disubmit sebelumnya, reset untuk pengerjaan baru
+    if (isSubmitted || Object.keys(answers).length === 0) {
+      setAnswers({});
+      setIsSubmitted(false);
+      setCurrentIndex(0);
+      setSecondsElapsed(0);
+    }
+    setViewMode('quiz');
+  };
 
   const handleSelectOption = (optionIndex) => {
-    if (isSubmitted) return;
+    // Validasi instan: hanya boleh memilih sekali per soal
+    if (answers[currentIndex] !== undefined) return;
+
     setAnswers((prev) => ({
       ...prev,
       [currentIndex]: optionIndex
@@ -89,10 +120,18 @@ export default function App() {
   };
 
   const handleSubmit = useCallback(() => {
+    const totalAnswered = Object.keys(answers).length;
+    if (totalAnswered < questions.length) {
+      const confirmSubmit = window.confirm(
+        `Anda baru menjawab ${totalAnswered} dari ${questions.length} soal. Apakah Anda yakin ingin menyelesaikan kuis sekarang?`
+      );
+      if (!confirmSubmit) return;
+    }
+
     setIsSubmitted(true);
     setIsRecapOpen(true);
 
-    // Hitung score
+    // Hitung skor
     let correct = 0;
     questions.forEach((q, i) => {
       if (answers[i] === q.correctAnswer) {
@@ -102,40 +141,66 @@ export default function App() {
 
     const score = Math.round((correct / questions.length) * 100);
 
-    // Selebrasi jika nilai >= 70
+    // Simpan ke riwayat pengerjaan
+    const newEntry = {
+      date: new Date().toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }),
+      userName: userName || 'Peserta',
+      score,
+      correctCount: correct,
+      duration: secondsElapsed
+    };
+
+    setQuizHistory((prev) => [newEntry, ...prev]);
+
+    // Efek selebrasi jika nilai >= 70
     if (score >= 70) {
       try {
         confetti({
           particleCount: 120,
-          spread: 70,
+          spread: 75,
           origin: { y: 0.6 }
         });
       } catch (e) {
-        // fallback jika confetti gagal
+        // Fallback jika lib canvas bermasalah
       }
     }
-  }, [answers]);
+  }, [answers, userName, secondsElapsed]);
 
   const handleRestart = () => {
     const confirmReset = window.confirm(
-      'Apakah Anda yakin ingin mengulang kuis dari awal? Semua jawaban akan direset.'
+      'Apakah Anda yakin ingin mengulang kuis dari awal? Jawaban dan waktu akan dimulai kembali dari 00:00.'
     );
     if (!confirmReset) return;
 
     localStorage.removeItem('bd_answers');
     localStorage.removeItem('bd_submitted');
     localStorage.removeItem('bd_current_index');
-    localStorage.removeItem('bd_time_left');
+    localStorage.removeItem('bd_seconds_elapsed');
 
     setAnswers({});
     setIsSubmitted(false);
     setCurrentIndex(0);
-    setTimeLeft(DEFAULT_TIME);
+    setSecondsElapsed(0);
     setIsRecapOpen(false);
+  };
+
+  const handleClearHistory = () => {
+    if (window.confirm('Hapus seluruh riwayat pengerjaan?')) {
+      setQuizHistory([]);
+      localStorage.removeItem('bd_history');
+    }
   };
 
   // Keyboard Navigation (Arrow Keys)
   useEffect(() => {
+    if (viewMode !== 'quiz') return;
+
     const handleKeyDown = (e) => {
       if (isRecapOpen || isMaterialOpen) return;
 
@@ -143,64 +208,81 @@ export default function App() {
         handlePrev();
       } else if (e.key === 'ArrowRight') {
         handleNext();
-      } else if (['1', '2', '3', '4'].includes(e.key) && !isSubmitted) {
+      } else if (['1', '2', '3', '4'].includes(e.key)) {
         handleSelectOption(parseInt(e.key, 10) - 1);
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentIndex, isSubmitted, isRecapOpen, isMaterialOpen]);
+  }, [currentIndex, viewMode, isRecapOpen, isMaterialOpen, answers]);
 
   const currentQuestion = questions[currentIndex];
+  const answeredCount = Object.keys(answers).length;
 
   return (
     <main className="app-container">
-      <div className="quiz-card">
-        <Header
-          currentIndex={currentIndex}
-          totalQuestions={questions.length}
-          category={currentQuestion?.category || 'P7-P9'}
-          timeLeft={timeLeft}
-          isSubmitted={isSubmitted}
+      {viewMode === 'menu' ? (
+        <StartMenu
+          onStartQuiz={handleStartQuiz}
           onOpenMaterial={() => setIsMaterialOpen(true)}
-          onOpenRecap={() => setIsRecapOpen(true)}
-          onRestart={handleRestart}
-        />
-
-        <QuestionCard
-          question={currentQuestion}
-          selectedOption={answers[currentIndex]}
-          onSelectOption={handleSelectOption}
-          isSubmitted={isSubmitted}
-        />
-
-        <Navigation
-          currentIndex={currentIndex}
           totalQuestions={questions.length}
-          onPrev={handlePrev}
-          onNext={handleNext}
-          onSubmit={handleSubmit}
-          isSubmitted={isSubmitted}
-          onOpenRecap={() => setIsRecapOpen(true)}
+          quizHistory={quizHistory}
+          onClearHistory={handleClearHistory}
         />
+      ) : (
+        <div className="quiz-card">
+          <Header
+            currentIndex={currentIndex}
+            totalQuestions={questions.length}
+            category={currentQuestion?.category || 'P7-P9'}
+            secondsElapsed={secondsElapsed}
+            isSubmitted={isSubmitted}
+            onOpenMaterial={() => setIsMaterialOpen(true)}
+            onReturnMenu={() => setViewMode('menu')}
+            onSubmit={handleSubmit}
+            answeredCount={answeredCount}
+          />
 
-        <QuestionGrid
-          totalQuestions={questions.length}
-          currentIndex={currentIndex}
-          answers={answers}
-          questions={questions}
-          isSubmitted={isSubmitted}
-          onSelectIndex={(idx) => setCurrentIndex(idx)}
-        />
-      </div>
+          <QuestionCard
+            question={currentQuestion}
+            selectedOption={answers[currentIndex]}
+            onSelectOption={handleSelectOption}
+          />
+
+          <Navigation
+            currentIndex={currentIndex}
+            totalQuestions={questions.length}
+            onPrev={handlePrev}
+            onNext={handleNext}
+            onSubmit={handleSubmit}
+            isSubmitted={isSubmitted}
+            onOpenRecap={() => setIsRecapOpen(true)}
+            answeredCount={answeredCount}
+          />
+
+          <QuestionGrid
+            totalQuestions={questions.length}
+            currentIndex={currentIndex}
+            answers={answers}
+            questions={questions}
+            onSelectIndex={(idx) => setCurrentIndex(idx)}
+          />
+        </div>
+      )}
 
       <RecapModal
         isOpen={isRecapOpen}
         onClose={() => setIsRecapOpen(false)}
         questions={questions}
         answers={answers}
+        durationSeconds={secondsElapsed}
+        userName={userName}
         onRestart={handleRestart}
+        onReturnMenu={() => {
+          setIsRecapOpen(false);
+          setViewMode('menu');
+        }}
         onSelectIndex={(idx) => setCurrentIndex(idx)}
       />
 

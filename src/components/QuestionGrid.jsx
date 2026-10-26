@@ -5,7 +5,6 @@ export default function QuestionGrid({
   currentIndex,
   answers,
   questions,
-  isSubmitted,
   onSelectIndex
 }) {
   return (
@@ -22,16 +21,12 @@ export default function QuestionGrid({
           cellClass += ' active';
         }
 
-        if (isSubmitted) {
-          if (!isAnswered) {
-            cellClass += ' review-skipped';
-          } else if (userAnswer === questions[i]?.correctAnswer) {
+        if (isAnswered) {
+          if (userAnswer === questions[i]?.correctAnswer) {
             cellClass += ' review-correct';
           } else {
             cellClass += ' review-wrong';
           }
-        } else if (isAnswered) {
-          cellClass += ' answered';
         }
 
         return (

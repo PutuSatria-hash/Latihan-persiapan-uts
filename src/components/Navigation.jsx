@@ -1,4 +1,5 @@
 import React from 'react';
+import { ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react';
 
 export default function Navigation({
   currentIndex,
@@ -7,7 +8,8 @@ export default function Navigation({
   onNext,
   onSubmit,
   isSubmitted,
-  onOpenRecap
+  onOpenRecap,
+  answeredCount
 }) {
   const isFirst = currentIndex === 0;
   const isLast = currentIndex === totalQuestions - 1;
@@ -20,47 +22,41 @@ export default function Navigation({
         onClick={onPrev}
         disabled={isFirst}
       >
-        Kembali
+        <ArrowLeft size={16} />
+        <span>Kembali</span>
       </button>
 
-      <div>
+      <div style={{ display: 'flex', gap: '8px' }}>
         {!isSubmitted ? (
-          isLast ? (
-            <button
-              type="button"
-              className="btn-nav btn-submit"
-              onClick={onSubmit}
-            >
-              Selesai Ujian
-            </button>
-          ) : (
-            <button
-              type="button"
-              className="btn-nav btn-next"
-              onClick={onNext}
-            >
-              Lanjut
-            </button>
-          )
-        ) : (
-          <div style={{ display: 'flex', gap: '8px' }}>
-            {!isLast && (
+          <>
+            {!isLast ? (
               <button
                 type="button"
                 className="btn-nav btn-next"
                 onClick={onNext}
               >
-                Lanjut
+                <span>Lanjut</span>
+                <ArrowRight size={16} />
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="btn-nav btn-submit"
+                onClick={onSubmit}
+              >
+                <CheckCircle2 size={16} />
+                <span>Selesai & Rekap</span>
               </button>
             )}
-            <button
-              type="button"
-              className="btn-nav btn-submit"
-              onClick={onOpenRecap}
-            >
-              Rekapan Hasil
-            </button>
-          </div>
+          </>
+        ) : (
+          <button
+            type="button"
+            className="btn-nav btn-submit"
+            onClick={onOpenRecap}
+          >
+            <span>Lihat Rekapan Nilai</span>
+          </button>
         )}
       </div>
     </div>

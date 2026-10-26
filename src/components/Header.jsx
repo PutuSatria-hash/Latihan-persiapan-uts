@@ -1,19 +1,20 @@
 import React from 'react';
-import { BookOpen, BarChart3, RotateCcw } from 'lucide-react';
+import { BookOpen, Home, Clock, CheckCircle2 } from 'lucide-react';
 
 export default function Header({
   currentIndex,
   totalQuestions,
   category,
-  timeLeft,
+  secondsElapsed,
   isSubmitted,
   onOpenMaterial,
-  onOpenRecap,
-  onRestart
+  onReturnMenu,
+  onSubmit,
+  answeredCount
 }) {
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
+  const formatStopwatch = (totalSecs) => {
+    const mins = Math.floor(totalSecs / 60);
+    const secs = totalSecs % 60;
     return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   };
 
@@ -22,11 +23,17 @@ export default function Header({
   return (
     <div>
       <div className="top-nav">
-        <div className="brand-badge">
-          <span className="brand-icon">BD</span>
-          <span>Big Data Quiz Engine</span>
-        </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <button
+          type="button"
+          className="btn-doc-link"
+          onClick={onReturnMenu}
+          title="Kembali ke Menu Utama"
+        >
+          <Home size={15} />
+          <span>Menu</span>
+        </button>
+
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           <button
             type="button"
             className="btn-doc-link"
@@ -34,18 +41,22 @@ export default function Header({
             title="Buka Catatan Materi P7-P9"
           >
             <BookOpen size={15} />
-            <span>Dokumen Materi</span>
+            <span>Materi</span>
           </button>
-          {isSubmitted && (
+          {!isSubmitted && (
             <button
               type="button"
               className="btn-doc-link"
-              onClick={onOpenRecap}
-              title="Lihat Rekapan Nilai"
-              style={{ background: '#000000', color: '#ffffff', borderColor: '#000000' }}
+              onClick={onSubmit}
+              title="Submit Kuis dan Lihat Hasil"
+              style={{
+                background: '#000000',
+                color: '#ffffff',
+                borderColor: '#000000'
+              }}
             >
-              <BarChart3 size={15} />
-              <span>Rekapan</span>
+              <CheckCircle2 size={15} />
+              <span>Selesai ({answeredCount}/{totalQuestions})</span>
             </button>
           )}
         </div>
@@ -59,8 +70,9 @@ export default function Header({
               Soal {currentIndex + 1} / {totalQuestions}
             </span>
           </div>
-          <div className={`timer-box ${timeLeft < 180 && !isSubmitted ? 'warning' : ''}`}>
-            <span>{formatTime(timeLeft)}</span>
+          <div className="timer-box" title="Waktu Pengerjaan Berjalan">
+            <Clock size={16} color="#64748b" />
+            <span>{formatStopwatch(secondsElapsed)}</span>
           </div>
         </div>
 
